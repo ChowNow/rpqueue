@@ -43,6 +43,7 @@ NEVER_SKIP = set()
 SHOULD_QUIT = multiprocessing.Array('i', (0,), lock=False)
 REENTRY_RETRY = 5
 MINIMUM_DELAY = 1
+EXECUTE_TASKS = False
 
 REDIS_CONNECTION_SETTINGS = {}
 POOL = None
@@ -224,6 +225,9 @@ class _Task(object):
             log_handler.debug("You probably intended to call the function: %s, you are half-way there", self.name)
         return _ExecutingTask(self, taskid)
     def next(self, now=None):
+        if not EXECUTE_TASKS:
+            return None
+
         if isinstance(self.delay, CronTab):
             return self.delay.next(now)
         return self.delay
@@ -439,6 +443,8 @@ def execute_tasks(queues=None, threads_per_process=1, processes=1, wait_per_thre
     Will execute tasks from the (optionally) provided queues until the first
     value in the global SHOULD_QUIT is considered false.
     '''
+    global EXECUTE_TASKS
+    EXECUTE_TASKS = True
     signal.signal(signal.SIGUSR1, quit_on_signal)
     log_handler.setLevel(logging.DEBUG)
     sp = []
