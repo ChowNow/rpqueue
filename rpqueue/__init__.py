@@ -104,8 +104,8 @@ def _enqueue_call(conn, queue, fname, args, kwargs, delay=0, taskid=None):
     # enqueue it
     pipeline.hset(ikey, taskid, message)
     if taskid == fname:
-        pipeline.zadd(rqkey, taskid, ts)
-    pipeline.zadd(qkey, taskid, ts)
+        pipeline.zadd(rqkey, **{taskid: ts})
+    pipeline.zadd(qkey, **{taskid: ts})
     pipeline.sadd(QUEUES_KNOWN, queue)
     pipeline.hincrby(SEEN_KEY, queue, 1)
     pipeline.execute()
@@ -161,7 +161,7 @@ def _get_work(conn, queues=None, timeout=1):
                     delay = REGISTRY[item_id].next(sch)
                     if delay is not None:
                         # it can be scheduled again, do it
-                        pipeline.zadd(qkey, item_id, sch + delay)
+                        pipeline.zadd(qkey, **{item_id: sch + delay})
                         # re-add the call arguments
                         pipeline.hset(iqueue, item_id, message)
                         pipeline.execute()
