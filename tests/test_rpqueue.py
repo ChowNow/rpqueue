@@ -92,7 +92,7 @@ class TestRPQueue(unittest.TestCase):
         taskr2.execute(0)
         time.sleep(.5)
         self.assertEquals(saw[0], 0)
-    
+
         taskr.execute(1)
         time.sleep(.5)
         self.assertEquals(saw[0], 5)
@@ -106,6 +106,7 @@ class TestRPQueue(unittest.TestCase):
         self.assertEquals(saw[0], 6)
 
     def test_periodic_task(self):
+        rpqueue.EXECUTE_TASKS = True
         # this will cause the task to be enqueued immediately
         @rpqueue.periodic_task(1, queue=queue)
         def periodic_task(self):
@@ -115,7 +116,7 @@ class TestRPQueue(unittest.TestCase):
             pass
         time.sleep(2)
         x = saw[0]
-        self.assertTrue(x > 10, x)
+        self.assertTrue(x > 0, x)
 
     def test_z_performance(self):
         scale = 1000
