@@ -1,3 +1,4 @@
+from __future__ import print_function
 
 import multiprocessing
 import threading
@@ -132,7 +133,7 @@ class TestRPQueue(unittest.TestCase):
         time.sleep(2)
         x = saw[0]
         self.assertTrue(x > 0, x)
-        print "\n%.1f tasks/second periodic tasks"%(x/2.0,)
+        print("\n%.1f tasks/second periodic tasks"%(x/2.0,))
 
     def test_z_performance1(self):
         saw[0] = 0
@@ -143,7 +144,7 @@ class TestRPQueue(unittest.TestCase):
             time.sleep(.05)
         s = saw[0]
         dt = time.time() - t
-        print "\n%.1f tasks/second injection/running"%(s/dt,)
+        print("\n%.1f tasks/second injection/running"%(s/dt,))
 
     def test_z_performance2(self):
         saw[0] = 0
@@ -153,7 +154,7 @@ class TestRPQueue(unittest.TestCase):
             time.sleep(.05)
         s = saw[0]
         dt2 = time.time() - t
-        print "%.1f tasks/second sequential retries"%(s/dt2,)
+        print("%.1f tasks/second sequential retries"%(s/dt2,))
 
     def test_z_performance3(self):
         saw[0] = 0
@@ -164,7 +165,7 @@ class TestRPQueue(unittest.TestCase):
             time.sleep(.05)
         s = saw[0]
         dt3 = time.time() - t
-        print "%.1f tasks/second delayed retries"%(s/dt3,)
+        print("%.1f tasks/second delayed retries"%(s/dt3,))
 
     def test_wait(self):
         wt = wait_test.execute(.01, delay=1)

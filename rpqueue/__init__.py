@@ -9,6 +9,7 @@ available: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 
 Other licenses may be available upon request.
 '''
+from __future__ import print_function
 
 import datetime
 import itertools
@@ -885,7 +886,7 @@ def print_rows(rows, use_header):
     else:
         fmt = '  '.join('%s' for i in xrange(len(rows[0])))
     for row in rows:
-        print fmt%tuple(row)
+        print(fmt%tuple(row))
 
 from optparse import OptionGroup, OptionParser
 parser = OptionParser(usage='''
@@ -951,7 +952,7 @@ if __name__ == '__main__':
     options, args = parser.parse_args()
     if options.pwprompt:
         if options.passwd:
-            print "You must pass either --password OR --pwprompt not both."
+            print("You must pass either --password OR --pwprompt not both.")
             sys.exit(1)
         import getpass
         options.passwd = getpass.getpass()
@@ -960,15 +961,15 @@ if __name__ == '__main__':
         options.passwd, options.timeout, getattr(options, 'unixpath', None))
 
     if (options.clear or options.page or options.delete) and not options.queue:
-        print "You must provide '--queue <queuename>' with that command"
+        print("You must provide '--queue <queuename>' with that command")
         sys.exit(1)
     if (bool(options.clear) + bool(options.page) + bool(options.delete)) > 1:
-        print "You can choose at most one of --clear, --page, or --delete"
+        print("You can choose at most one of --clear, --page, or --delete")
         sys.exit(1)
 
     if options.clear:
         items = clear_queue(options.queue)
-        print "Queue %r cleared of %i items."%(options.queue, items)
+        print("Queue %r cleared of %i items."%(options.queue, items))
     elif options.queue and not options.delete:
         items = get_page(options.queue, options.page)
         out = []
@@ -985,9 +986,9 @@ if __name__ == '__main__':
         print_rows(out, not options.skip)
     elif options.delete:
         if delete_item(options.queue, options.delete):
-            print "Deleted item:", options.delete
+            print("Deleted item:", options.delete)
         else:
-            print "Item not found"
+            print("Item not found")
             sys.exit(1)
     else:
         known = queue_sizes()

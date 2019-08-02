@@ -1,3 +1,4 @@
+from __future__ import print_function
 
 import sys
 
@@ -29,16 +30,16 @@ if __name__ == '__main__':
         options.passwd, options.timeout, getattr(options, 'unixpath', None))
 
     if not options.run:
-        print "You must pass --module"
+        print("You must pass --module")
         sys.exit(1)
     if options.threads < 1:
-        print "You must have at least 1 thread, you gave %s"%(options.threads,)
+        print("You must have at least 1 thread, you gave %s"%(options.threads,))
         sys.exit(1)
     if options.processes < 1:
-        print "You must have at least 1 process, you gave %s"%(options.threads,)
+        print("You must have at least 1 process, you gave %s"%(options.threads,))
         sys.exit(1)
     if options.wait < 0:
-        print "You must provide a non-negative wait, you provided %r"%(options.wait,)
+        print("You must provide a non-negative wait, you provided %r"%(options.wait,))
         sys.exit(1)
     import imp
     # used for the side-effect if it can't be found
