@@ -154,7 +154,14 @@ logging.basicConfig()
 log_handler = logging.root
 
 SUCCESS_LOG_LEVEL = 'debug'
-AFTER_FORK = None
+
+def LD_REFRESH():
+    import os
+    import ldclient
+    ldclient.set_config(LDConfig(os.environ.get("LD_SDK_KEY")))
+    client = ldclient.get()j
+
+AFTER_FORK = LD_REFRESH
 
 CURRENT_TASK = threading.local()
 

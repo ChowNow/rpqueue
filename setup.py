@@ -33,5 +33,5 @@ setup(
     ],
     license='GNU LGPL v2.1',
     long_description=long_description,
-    requires=['redis', 'future'],
+    requires=['redis', 'future', 'launchdarkly-server-sdk'],
 )
