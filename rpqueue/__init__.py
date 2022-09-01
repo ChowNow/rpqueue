@@ -959,6 +959,7 @@ def _print_stackframes_on_signal(signum, frame):
         log_handler.critical('PID: %s THREAD: %s\n%s' % (pid, tid, ''.join(traceback.format_stack(frame))))
 
 def execute_task_threads(queues=None, threads=1, wait_per_thread=1, module=None, ld_client=None):
+    log_handler.info(f"execute_task_threads: This is the ld_client: {ld_client}")
     signal.signal(signal.SIGUSR1, quit_on_signal)
     signal.signal(signal.SIGTERM, quit_on_signal)
     signal.signal(signal.SIGUSR2, _print_stackframes_on_signal)
@@ -982,6 +983,7 @@ def _execute_tasks(queues=None, ld_client=None):
     '''
     Internal implementation detail to execute multiple tasks.
     '''
+    log_handler.info(f"execute_tasks: This is the ld_client: {ld_client}")
     conn = get_connection()
     while not SHOULD_QUIT[0]:
         work = _get_work(conn, queues)
@@ -998,6 +1000,7 @@ def _execute_task(work, conn, ld_client):
     try:
         taskid, fname, args, kwargs, scheduled = work
         kwargs['ld_client'] = ld_client
+        log_handler.info(f"execute_task: This is the ld_client: {ld_client}")
     except ValueError as err:
         log_handler.exception(err)
         return
