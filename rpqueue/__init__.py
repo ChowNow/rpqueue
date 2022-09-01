@@ -159,7 +159,7 @@ def LD_REFRESH():
     import os
     import ldclient
     ldclient.set_config(LDConfig(os.environ.get("LD_SDK_KEY")))
-    client = ldclient.get()j
+    client = ldclient.get()
 
 AFTER_FORK = LD_REFRESH
 
