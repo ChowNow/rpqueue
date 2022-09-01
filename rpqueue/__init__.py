@@ -25,6 +25,8 @@ except ImportError:
     import json
 import logging
 import multiprocessing
+from multiprocessing import Manager
+from multiprocessing.managers import BaseManager
 import os
 import signal
 import sys
@@ -42,6 +44,7 @@ except ImportError:
 
 
 import redis
+import ldclient
 
 if list(map(int, redis.__version__.split('.'))) < [2, 4, 12]:
     raise Exception("Upgrade your Redis client to version 2.4.12 or later")
@@ -876,6 +879,21 @@ def quit_on_signal(signum, frame):
 
 SUCCESS_LOG = None
 
+
+class LDTaskClient:
+    def __init__(self):
+        def _get_config():
+            return ldclient.config.Config(
+                os.environ.get("LD_SDK_KEY"),
+                http=ldclient.config.HTTPConfig(
+                    connect_timeout=3,
+                    read_timeout=3,
+                ),
+            )
+
+        self.ld_client = ldclient.LDClient(config=_get_config())
+
+
 def execute_tasks(queues=None, threads_per_process=1, processes=1, wait_per_thread=1, module=None):
     '''
     Will execute tasks from the (optionally) provided queues until the first
@@ -899,8 +917,14 @@ def execute_tasks(queues=None, threads_per_process=1, processes=1, wait_per_thre
     processes = max(processes, 1)
     __import__(module) # for any connection modification side-effects
     log_handler.info("Starting %i subprocesses", processes)
+    logging.debug("Starting Manager")
+
+    BaseManager.register("LDTaskClient", LDTaskClient)
+    manager = BaseManager()
+    manager.start()
+    ld_client = manager.LDTaskClient()
+
     for p in range(processes):
-        logging.debug("TESTING")
         pp = multiprocessing.Process(target=execute_task_threads, args=(queues, threads_per_process, 1, module))
         pp.daemon = True
         pp.start()
@@ -992,6 +1016,7 @@ def _execute_task(work, conn):
     to_execute = REGISTRY[fname](taskid, True)
 
     try:
+        log_handler.info("INFO: ARGS %s KWARGS %s", args, kwargs)
         to_execute(*args, **kwargs)
     except (KeyboardInterrupt, SystemExit):
         raise
