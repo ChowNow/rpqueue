@@ -925,7 +925,7 @@ def execute_tasks(queues=None, threads_per_process=1, processes=1, wait_per_thre
     ld_client = manager.LDTaskClient()
 
     for p in range(processes):
-        pp = multiprocessing.Process(target=execute_task_threads, args=(queues, threads_per_process, 1, module))
+        pp = multiprocessing.Process(target=execute_task_threads, args=(queues, threads_per_process, 1, module, ld_client))
         pp.daemon = True
         pp.start()
         sp.append(pp)
@@ -958,7 +958,7 @@ def _print_stackframes_on_signal(signum, frame):
     for tid, frame in list(sys._current_frames().items()):
         log_handler.critical('PID: %s THREAD: %s\n%s' % (pid, tid, ''.join(traceback.format_stack(frame))))
 
-def execute_task_threads(queues=None, threads=1, wait_per_thread=1, module=None):
+def execute_task_threads(queues=None, threads=1, wait_per_thread=1, module=None, ld_client=None):
     signal.signal(signal.SIGUSR1, quit_on_signal)
     signal.signal(signal.SIGTERM, quit_on_signal)
     signal.signal(signal.SIGUSR2, _print_stackframes_on_signal)
@@ -972,13 +972,13 @@ def execute_task_threads(queues=None, threads=1, wait_per_thread=1, module=None)
     st = []
     log_handler.info("PID %i executing tasks in %i threads %s", os.getpid(), threads, MESSAGES_KEY)
     for t in range(threads-1):
-        tt = threading.Thread(target=_execute_tasks, args=(queues,))
+        tt = threading.Thread(target=_execute_tasks, args=(queues, ld_client))
         tt.daemon = True
         tt.start()
         st.append(tt)
     _execute_tasks(queues)
 
-def _execute_tasks(queues=None):
+def _execute_tasks(queues=None, ld_client=None):
     '''
     Internal implementation detail to execute multiple tasks.
     '''
@@ -989,14 +989,15 @@ def _execute_tasks(queues=None):
             time.sleep(.05)
             continue
 
-        _execute_task(work, conn)
+        _execute_task(work, conn, ld_client)
 
-def _execute_task(work, conn):
+def _execute_task(work, conn, ld_client):
     '''
     Internal implementation detail to execute a single task.
     '''
     try:
         taskid, fname, args, kwargs, scheduled = work
+        kwargs['ld_client'] = ld_client
     except ValueError as err:
         log_handler.exception(err)
         return
