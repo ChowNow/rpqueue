@@ -900,6 +900,7 @@ def execute_tasks(queues=None, threads_per_process=1, processes=1, wait_per_thre
     __import__(module) # for any connection modification side-effects
     log_handler.info("Starting %i subprocesses", processes)
     for p in range(processes):
+        SUCCESS_LOG("TESTING")
         pp = multiprocessing.Process(target=execute_task_threads, args=(queues, threads_per_process, 1, module))
         pp.daemon = True
         pp.start()
