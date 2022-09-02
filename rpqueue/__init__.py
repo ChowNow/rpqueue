@@ -893,6 +893,13 @@ class LDTaskClient:
 
         self.ld_client = ldclient.LDClient(config=_get_config())
 
+        def check_flag(self):
+            print(self.ld_client)
+
+
+class LDManager(BaseManager):
+    pass
+
 
 def execute_tasks(queues=None, threads_per_process=1, processes=1, wait_per_thread=1, module=None):
     '''
@@ -919,10 +926,11 @@ def execute_tasks(queues=None, threads_per_process=1, processes=1, wait_per_thre
     log_handler.info("Starting %i subprocesses", processes)
     logging.debug("Starting Manager")
 
-    BaseManager.register("LDTaskClient", LDTaskClient)
-    manager = BaseManager()
+    LDManager.register("TaskClient", LDTaskClient)
+    manager = LDManager()
     manager.start()
-    ld_client = manager.LDTaskClient()
+
+    ld_client = manager.TaskClient()
 
     for p in range(processes):
         pp = multiprocessing.Process(target=execute_task_threads, args=(queues, threads_per_process, 1, module, ld_client))
