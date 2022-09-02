@@ -984,15 +984,15 @@ def execute_task_threads(queues=None, threads=1, wait_per_thread=1, module=None)
                 read_timeout=3,
             ),
         )
-    task_client = ldclient.set_config(ldclient.LDClient(config=_get_config())
+    task_client = ldclient.set_config(ldclient.LDClient(config=_get_config()))
     #set_client(task_client)
-    log_handler.info(f"execute_task_threads: This is the ld_client: {ld_client}")
+    log_handler.info(f"execute_task_threads: This is the ld_client: {task_client}")
     signal.signal(signal.SIGUSR1, quit_on_signal)
     signal.signal(signal.SIGTERM, quit_on_signal)
     signal.signal(signal.SIGUSR2, _print_stackframes_on_signal)
     if module:
         __import__(module)
-        set_client(ld_client)
+        set_client(task_client)
     if AFTER_FORK:
         try:
             AFTER_FORK()
