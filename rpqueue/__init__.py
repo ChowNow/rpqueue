@@ -25,8 +25,6 @@ except ImportError:
     import json
 import logging
 import multiprocessing
-from multiprocessing import Manager
-from multiprocessing.managers import BaseManager
 import os
 import signal
 import sys
@@ -879,31 +877,6 @@ def quit_on_signal(signum, frame):
 
 SUCCESS_LOG = None
 
-
-class LDTaskClient:
-    def __init__(self):
-        def _get_config():
-            return ldclient.config.Config(
-                os.environ.get("LD_SDK_KEY"),
-                http=ldclient.config.HTTPConfig(
-                    connect_timeout=3,
-                    read_timeout=3,
-                ),
-            )
-
-        self.ld_client = ldclient.LDClient(config=_get_config())
-
-        def check_flag(self):
-            print(self.ld_client)
-
-        def get_client(self):
-            return self.ld_client
-
-
-class LDManager(BaseManager):
-    pass
-
-
 def set_client(client):
     from util.feature_flags_v2 import FeatureFlag
     #FeatureFlag.ld_client = auto_proxy_client.get_client()
@@ -933,13 +906,6 @@ def execute_tasks(queues=None, threads_per_process=1, processes=1, wait_per_thre
     processes = max(processes, 1)
     __import__(module) # for any connection modification side-effects
     log_handler.info("Starting %i subprocesses", processes)
-    #logging.debug("Starting Manager")
-
-    #LDManager.register("TaskClient", LDTaskClient)
-    #manager = LDManager()
-    #manager.start()
-
-    #ld_client = manager.TaskClient()
 
     for p in range(processes):
         pp = multiprocessing.Process(target=execute_task_threads, args=(queues, threads_per_process, 1, module))
@@ -986,7 +952,6 @@ def execute_task_threads(queues=None, threads=1, wait_per_thread=1, module=None)
             ),
         )
     task_client = ldclient.LDClient(config=_get_config())
-    #set_client(task_client)
     log_handler.info(f"execute_task_threads: This is the ld_client: {task_client}")
     signal.signal(signal.SIGUSR1, quit_on_signal)
     signal.signal(signal.SIGTERM, quit_on_signal)
