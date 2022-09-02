@@ -1007,7 +1007,7 @@ def _execute_task(work, conn, ld_client):
     '''
     try:
         taskid, fname, args, kwargs, scheduled = work
-        kwargs['ld_client'] = ld_client
+        #kwargs['ld_client'] = ld_client
         log_handler.info(f"execute_task: This is the ld_client: {ld_client}")
     except ValueError as err:
         log_handler.exception(err)
