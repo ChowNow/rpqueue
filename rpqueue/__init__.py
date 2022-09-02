@@ -901,6 +901,11 @@ class LDManager(BaseManager):
     pass
 
 
+def set_client(client):
+    from util.feature_flags_v2 import FeatureFlag
+    FeatureFlag.set_client(client)
+
+
 def execute_tasks(queues=None, threads_per_process=1, processes=1, wait_per_thread=1, module=None):
     '''
     Will execute tasks from the (optionally) provided queues until the first
@@ -973,6 +978,7 @@ def execute_task_threads(queues=None, threads=1, wait_per_thread=1, module=None,
     signal.signal(signal.SIGUSR2, _print_stackframes_on_signal)
     if module:
         __import__(module)
+        set_client(ld_client)
     if AFTER_FORK:
         try:
             AFTER_FORK()
@@ -981,17 +987,16 @@ def execute_task_threads(queues=None, threads=1, wait_per_thread=1, module=None,
     st = []
     log_handler.info("PID %i executing tasks in %i threads %s", os.getpid(), threads, MESSAGES_KEY)
     for t in range(threads-1):
-        tt = threading.Thread(target=_execute_tasks, args=(queues, ld_client))
+        tt = threading.Thread(target=_execute_tasks, args=(queues,))
         tt.daemon = True
         tt.start()
         st.append(tt)
     _execute_tasks(queues)
 
-def _execute_tasks(queues=None, ld_client=None):
+def _execute_tasks(queues=None):
     '''
     Internal implementation detail to execute multiple tasks.
     '''
-    log_handler.info(f"execute_tasks: This is the ld_client: {ld_client}")
     conn = get_connection()
     while not SHOULD_QUIT[0]:
         work = _get_work(conn, queues)
@@ -999,16 +1004,14 @@ def _execute_tasks(queues=None, ld_client=None):
             time.sleep(.05)
             continue
 
-        _execute_task(work, conn, ld_client)
+        _execute_task(work, conn)
 
-def _execute_task(work, conn, ld_client):
+def _execute_task(work, conn):
     '''
     Internal implementation detail to execute a single task.
     '''
     try:
         taskid, fname, args, kwargs, scheduled = work
-        #kwargs['ld_client'] = ld_client
-        log_handler.info(f"execute_task: This is the ld_client: {ld_client}")
     except ValueError as err:
         log_handler.exception(err)
         return
