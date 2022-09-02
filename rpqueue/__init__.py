@@ -156,12 +156,6 @@ log_handler = logging.root
 
 SUCCESS_LOG_LEVEL = 'debug'
 
-#def LD_REFRESH():
-#    import os
-#    import ldclient
-#    ldclient.set_config(LDConfig(os.environ.get("LD_SDK_KEY")))
-#    client = ldclient.get()
-
 AFTER_FORK = None
 
 CURRENT_TASK = threading.local()
@@ -879,9 +873,7 @@ SUCCESS_LOG = None
 
 def set_client(client):
     from util.feature_flags_v2 import FeatureFlag
-    #FeatureFlag.ld_client = auto_proxy_client.get_client()
     FeatureFlag.ld_client = client
-
 
 def execute_tasks(queues=None, threads_per_process=1, processes=1, wait_per_thread=1, module=None):
     '''
@@ -942,7 +934,6 @@ def _print_stackframes_on_signal(signum, frame):
         log_handler.critical('PID: %s THREAD: %s\n%s' % (pid, tid, ''.join(traceback.format_stack(frame))))
 
 def execute_task_threads(queues=None, threads=1, wait_per_thread=1, module=None):
-    import ldclient
     def _get_config():
         return ldclient.config.Config(
             os.environ.get("LD_SDK_KEY"),
@@ -952,7 +943,6 @@ def execute_task_threads(queues=None, threads=1, wait_per_thread=1, module=None)
             ),
         )
     task_client = ldclient.LDClient(config=_get_config())
-    log_handler.info(f"execute_task_threads: This is the ld_client: {task_client}")
     signal.signal(signal.SIGUSR1, quit_on_signal)
     signal.signal(signal.SIGTERM, quit_on_signal)
     signal.signal(signal.SIGUSR2, _print_stackframes_on_signal)
