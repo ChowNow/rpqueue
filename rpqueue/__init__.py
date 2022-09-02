@@ -904,9 +904,10 @@ class LDManager(BaseManager):
     pass
 
 
-def set_client(auto_proxy_client):
+def set_client(client):
     from util.feature_flags_v2 import FeatureFlag
-    FeatureFlag.ld_client = auto_proxy_client.get_client()
+    #FeatureFlag.ld_client = auto_proxy_client.get_client()
+    FeatureFlag.ld_client = client
 
 
 def execute_tasks(queues=None, threads_per_process=1, processes=1, wait_per_thread=1, module=None):
