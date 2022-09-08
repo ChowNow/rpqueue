@@ -39,6 +39,8 @@ try:
 except ImportError:
     class CronTab(object):
         __slots__ = ()
+
+
 import redis
 
 if list(map(int, redis.__version__.split('.'))) < [2, 4, 12]:
