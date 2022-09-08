@@ -39,7 +39,6 @@ try:
 except ImportError:
     class CronTab(object):
         __slots__ = ()
-
 import redis
 
 if list(map(int, redis.__version__.split('.'))) < [2, 4, 12]:
@@ -153,7 +152,6 @@ logging.basicConfig()
 log_handler = logging.root
 
 SUCCESS_LOG_LEVEL = 'debug'
-
 AFTER_FORK = None
 
 CURRENT_TASK = threading.local()
@@ -892,7 +890,6 @@ def execute_tasks(queues=None, threads_per_process=1, processes=1, wait_per_thre
     processes = max(processes, 1)
     __import__(module) # for any connection modification side-effects
     log_handler.info("Starting %i subprocesses", processes)
-
     for p in range(processes):
         pp = multiprocessing.Process(target=execute_task_threads, args=(queues, threads_per_process, 1, module))
         pp.daemon = True
