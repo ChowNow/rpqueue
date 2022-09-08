@@ -41,7 +41,7 @@ except ImportError:
         __slots__ = ()
 
 
-import ldclient
+#import ldclient
 import redis
 
 if list(map(int, redis.__version__.split('.'))) < [2, 4, 12]:
@@ -871,10 +871,6 @@ def quit_on_signal(signum, frame):
 
 SUCCESS_LOG = None
 
-#def set_client(client):
-#    from util.feature_flags_v2 import FeatureFlag
-#    FeatureFlag.ld_client = client
-
 def execute_tasks(queues=None, threads_per_process=1, processes=1, wait_per_thread=1, module=None):
     '''
     Will execute tasks from the (optionally) provided queues until the first
@@ -934,21 +930,21 @@ def _print_stackframes_on_signal(signum, frame):
         log_handler.critical('PID: %s THREAD: %s\n%s' % (pid, tid, ''.join(traceback.format_stack(frame))))
 
 def execute_task_threads(queues=None, threads=1, wait_per_thread=1, module=None):
-    def _get_config():
-        return ldclient.config.Config(
-            os.environ.get("LD_SDK_KEY"),
-            http=ldclient.config.HTTPConfig(
-                connect_timeout=3,
-                read_timeout=3,
-            ),
-        )
-    task_client = ldclient.LDClient(config=_get_config())
+    #def _get_config():
+    #    return ldclient.config.Config(
+    #        os.environ.get("LD_SDK_KEY"),
+    #        http=ldclient.config.HTTPConfig(
+    #            connect_timeout=3,
+    #            read_timeout=3,
+    #        ),
+    #    )
+    #task_client = ldclient.LDClient(config=_get_config())
     signal.signal(signal.SIGUSR1, quit_on_signal)
     signal.signal(signal.SIGTERM, quit_on_signal)
     signal.signal(signal.SIGUSR2, _print_stackframes_on_signal)
     if module:
         __import__(module)
-        __import__(module).set_client(task_client)
+        __import__(module).set_ld_task_client()
         #set_client(task_client)
     if AFTER_FORK:
         try:
@@ -1002,7 +998,6 @@ def _execute_task(work, conn):
     to_execute = REGISTRY[fname](taskid, True)
 
     try:
-        log_handler.info("INFO: ARGS %s KWARGS %s", args, kwargs)
         to_execute(*args, **kwargs)
     except (KeyboardInterrupt, SystemExit):
         raise
