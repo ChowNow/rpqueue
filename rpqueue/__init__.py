@@ -948,7 +948,7 @@ def execute_task_threads(queues=None, threads=1, wait_per_thread=1, module=None)
     signal.signal(signal.SIGUSR2, _print_stackframes_on_signal)
     if module:
         __import__(module)
-        module.set_client(task_client)
+        __import__(module).set_client(task_client)
         #set_client(task_client)
     if AFTER_FORK:
         try:
