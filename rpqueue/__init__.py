@@ -938,7 +938,7 @@ def execute_task_threads(queues=None, threads=1, wait_per_thread=1, module=None)
             # https://chownow.atlassian.net/browse/CN-25221
             __import__(module).set_ld_task_client()
         except Exception as e:
-            log_handler.exception("ERROR: Unable to setup the LD Task Client: %s", e)
+            log_handler.exception("ERROR: Unable to setup the LaunchDarkly SDK within Rpqueue: %s", e)
     if AFTER_FORK:
         try:
             AFTER_FORK()
