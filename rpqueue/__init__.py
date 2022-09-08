@@ -41,8 +41,8 @@ except ImportError:
         __slots__ = ()
 
 
-import redis
 import ldclient
+import redis
 
 if list(map(int, redis.__version__.split('.'))) < [2, 4, 12]:
     raise Exception("Upgrade your Redis client to version 2.4.12 or later")
@@ -871,9 +871,9 @@ def quit_on_signal(signum, frame):
 
 SUCCESS_LOG = None
 
-def set_client(client):
-    from util.feature_flags_v2 import FeatureFlag
-    FeatureFlag.ld_client = client
+#def set_client(client):
+#    from util.feature_flags_v2 import FeatureFlag
+#    FeatureFlag.ld_client = client
 
 def execute_tasks(queues=None, threads_per_process=1, processes=1, wait_per_thread=1, module=None):
     '''
@@ -948,7 +948,8 @@ def execute_task_threads(queues=None, threads=1, wait_per_thread=1, module=None)
     signal.signal(signal.SIGUSR2, _print_stackframes_on_signal)
     if module:
         __import__(module)
-        set_client(task_client)
+        module.set_client(task_client)
+        #set_client(task_client)
     if AFTER_FORK:
         try:
             AFTER_FORK()
