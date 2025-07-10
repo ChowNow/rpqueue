@@ -998,7 +998,7 @@ def set_priority(queue, qpri, conn=None):
     Queues with priorities come before queues without priorities.
     '''
     conn = conn or get_connection()
-    conn.zadd(QUEUES_PRIORITY, queue, qpri)
+    conn.zadd(QUEUES_PRIORITY, {queue: qpri})
 
 def known_queues(conn=None):
     '''
