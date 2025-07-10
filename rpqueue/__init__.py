@@ -587,7 +587,7 @@ class _ExecutingTask(object):
         want_status = self.taskid not in REGISTRY
         conn = get_connection()
         if want_status:
-            conn.setex(k, '', 60)
+            conn.setex(k, 60, '')
 
         try:
             result = self.task.function(*args, **kwargs)
@@ -602,8 +602,8 @@ class _ExecutingTask(object):
             pass
         if self.task.save_results > 0:
             conn.setex(k,
-                json.dumps(result),
                 self.task.save_results,
+                json.dumps(result),
             )
         elif want_status:
             conn.delete(k)
