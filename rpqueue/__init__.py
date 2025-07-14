@@ -244,9 +244,9 @@ def _enqueue_call(conn, queue, fname, args, kwargs, delay=0, taskid=None):
     # enqueue it
     pipeline.hset(ikey, taskid, message)
     if taskid == fname:
-        pipeline.zadd(rqkey, **{taskid: ts})
+        pipeline.zadd(rqkey, {taskid: ts})
     if delay > 0:
-        pipeline.zadd(qkey, **{taskid: ts})
+        pipeline.zadd(qkey, {taskid: ts})
     else:
         pipeline.rpush(nkey, taskid)
     pipeline.sadd(QUEUES_KNOWN, queue)
@@ -325,7 +325,7 @@ def _get_work(conn, queues=None, timeout=1):
             if delay is not None:
                 # it can be scheduled again, do it
                 if delay > 0:
-                    pipeline.zadd(QUEUE_KEY + queue, **{item_id: sch + delay})
+                    pipeline.zadd(QUEUE_KEY + queue, {item_id: sch + delay})
                 else:
                     pipeline.rpush(NOW_KEY + queue, item_id)
                 # re-add the call arguments
@@ -718,7 +718,7 @@ class SimpleLock(object):
         if pipe.execute()[-1]:
             # lock is already held, :(
             raise NoLock()
-        if not self.conn.zadd(LOCK_KEY, **{self.name: time.time() + self.duration}):
+        if not self.conn.zadd(LOCK_KEY, {self.name: time.time() + self.duration}):
             # we just refreshed the other lock, no big deal, it didn't exist
             # one round-trip ago
             raise NoLock()
@@ -728,7 +728,7 @@ class SimpleLock(object):
             self.conn.zrem(LOCK_KEY, self.name)
     def refresh(self):
         'Refreshes a lock'
-        self.conn.zadd(LOCK_KEY, **{self.name: time.time() + self.duration})
+        self.conn.zadd(LOCK_KEY, {self.name: time.time() + self.duration})
 
 def task(*args, **kwargs):
     '''
@@ -998,7 +998,7 @@ def set_priority(queue, qpri, conn=None):
     Queues with priorities come before queues without priorities.
     '''
     conn = conn or get_connection()
-    conn.zadd(QUEUES_PRIORITY, **{queue: qpri})
+    conn.zadd(QUEUES_PRIORITY, {queue: qpri})
 
 def known_queues(conn=None):
     '''
