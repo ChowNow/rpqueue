@@ -1,4 +1,3 @@
-
 '''
 rpqueue (Redis Priority Queue)
 
@@ -152,6 +151,42 @@ LOG_LEVELS = dict((v, getattr(logging, v)) for v in ['DEBUG', 'INFO', 'WARNING',
 LOG_LEVEL = 'info'
 logging.basicConfig()
 log_handler = logging.root
+
+# Case-insensitive set of key names to redact from logs
+SENSITIVE_REDACT_KEYS = frozenset({
+    'api_key', '$api_key', 'apikey', 'api-key', 'x-api-key',
+    'secret', 'secret_key', 'client_secret', 'secret-key', 'secret_access_key', 'secret-access-key',
+    'token', 'access_token', 'refresh_token', 'id_token', 'auth_token', 'oauth_token',
+})
+
+# Security: sanitization helpers to redact sensitive values from args/kwargs
+def _sanitize_for_logging(obj, redact_keys=SENSITIVE_REDACT_KEYS):
+    """Return a sanitized version of obj with sensitive values redacted.
+    - Dict keys that match redact_keys (case-insensitive) have their values replaced with '[REDACTED]'.
+    - Recurses into lists/tuples/dicts to sanitize nested structures.
+    """
+    try:
+        if isinstance(obj, dict):
+            sanitized = {}
+            for k, v in obj.items():
+                k_str = k if isinstance(k, str) else str(k)
+                if k_str.lower() in redact_keys:
+                    sanitized[k] = '[REDACTED]'
+                else:
+                    sanitized[k] = _sanitize_for_logging(v, redact_keys)
+            return sanitized
+        if isinstance(obj, (list, tuple)):
+            seq = [_sanitize_for_logging(v, redact_keys) for v in obj]
+            return tuple(seq) if isinstance(obj, tuple) else seq
+        return obj
+    except Exception:
+        return "REDACTED"
+
+def _sanitize_args_kwargs(args, kwargs, redact_keys=SENSITIVE_REDACT_KEYS):
+    """Sanitize args and kwargs for safe logging."""
+    safe_args = _sanitize_for_logging(list(args), redact_keys)
+    safe_kwargs = _sanitize_for_logging(dict(kwargs or {}), redact_keys)
+    return safe_args, safe_kwargs
 
 SUCCESS_LOG_LEVEL = 'info'
 AFTER_FORK = None
@@ -988,7 +1023,12 @@ def _execute_task(work, conn):
     except (KeyboardInterrupt, SystemExit):
         raise
     except Exception as e:
-        log_handler.exception("ERROR: Exception in task %r: %s", to_execute, e)
+        # Security: sanitize args/kwargs to avoid leaking sensitive data in logs
+        safe_args, safe_kwargs = _sanitize_args_kwargs(args, kwargs)
+        log_handler.exception(
+            "ERROR: Exception in task %s %s args=%s kwargs=%s: %s",
+            taskid, fname, safe_args, safe_kwargs, e,
+        )
     else:
         SUCCESS_LOG("SUCCESS: Task completed: %s %s", taskid, fname)
 
