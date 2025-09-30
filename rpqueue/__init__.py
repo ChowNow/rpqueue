@@ -154,7 +154,7 @@ log_handler = logging.root
 
 # Case-insensitive set of key names to redact from logs
 SENSITIVE_REDACT_KEYS = frozenset({
-    'api_key', '$api_key', 'apikey', 'api-key', 'x-api-key',
+    'api_key', '$api_key', 'apikey', 'api-key', 'x-api-key', 'password',
     'secret', 'secret_key', 'client_secret', 'secret-key', 'secret_access_key', 'secret-access-key',
     'token', 'access_token', 'refresh_token', 'id_token', 'auth_token', 'oauth_token',
 })
