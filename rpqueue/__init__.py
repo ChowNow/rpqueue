@@ -1018,6 +1018,10 @@ def _execute_task(work, conn):
 
     to_execute = REGISTRY[fname](taskid, True)
 
+    # TEMPORARY: Force exception to test API key redaction
+    if kwargs.get('_test_redaction'):
+        raise Exception("TEST: Forcing exception to test API key redaction")
+
     try:
         to_execute(*args, **kwargs)
     except (KeyboardInterrupt, SystemExit):
